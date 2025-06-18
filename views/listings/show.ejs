@@ -1,0 +1,145 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+  <!-- Listing Image and Details -->
+  <div class="row mb-4">
+    <div class="col-12 col-md-8 offset-md-2">
+      <div class="card show-card">
+        <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing_image" style="object-fit: cover; max-height: 400px;">
+        <div class="card-body">
+          <h3><%= listing.title %></h3>
+          <p class="card-text"><i>Owned By: <%= listing.owner.username %></i></p>
+          <p class="card-text"><%= listing.description %></p>
+          <p class="card-text">₹ <%= listing.price.toLocaleString("en-IN") %></p>
+          <p class="card-text"><%= listing.location %>, <%= listing.country %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Form -->
+  <% if (currUser && !listing.owner._id.equals(currUser._id)) { %>
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2">
+        <div class="card p-3 shadow-sm">
+          <h5>Book This Stay</h5>
+          <form action="/listings/<%= listing._id %>/book" method="POST">
+            <div class="row g-2">
+              <div class="col-md-5">
+                <label class="form-label">From</label>
+                <input type="date" name="fromDate" class="form-control" required>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label">To</label>
+                <input type="date" name="toDate" class="form-control" required>
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-success w-100">Book</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Edit/Delete Buttons for Owner -->
+  <% if (currUser && listing.owner._id.equals(currUser._id)) { %>
+    <div class="row mb-4">
+      <div class="col-md-8 offset-md-2 d-flex justify-content-between">
+        <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark">Edit</a>
+        <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+          <button class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Review Section -->
+  <div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+      <% if (currUser && hasBooked) { %>
+        <h4>Leave a Review</h4>
+        <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
+           <div class="mb=3 mt=3">
+                <label for="rating" class="form-label">Rating</label>
+            <fieldset class="starability-slot">
+                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+                <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                <label for="first-rate1" title="Terrible">1 star</label>
+                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                <label for="first-rate2" title="Not good">2 stars</label>
+                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                <label for="first-rate3" title="Average">3 stars</label>
+                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                <label for="first-rate4" title="Very good">4 stars</label>
+                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                <label for="first-rate5" title="Amazing">5 stars</label>
+              </fieldset>
+            </div>
+
+          <div class="mb-3">
+            <label for="comment" class="form-label">Comments</label>
+            <textarea name="review[comment]" id="comment" rows="4" class="form-control" required></textarea>
+            <div class="invalid-feedback">Please add some comments for the review.</div>
+          </div>
+          <button class="btn btn-outline-dark">Submit</button>
+        </form>
+        <hr>
+      <% } else if (currUser) { %>
+        <p class="text-muted">You can only review this listing after booking.</p>
+      <% } else { %>
+        <p class="text-muted">Login to book or leave a review.</p>
+      <% } %>
+
+      <!-- Display All Reviews -->
+      <% if (listing.reviews.length > 0) { %>
+        <h5>All Reviews</h5>
+        <div class="row">
+          <% for (let review of listing.reviews) { %>
+            <div class="col-md-6 mb-3">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title"><%= review.author.username %></h5>
+                  <p class="starability-result card-text" data-rating="<%= review.rating %>">Rated: <%= review.rating %> stars</p>
+                  <p class="card-text"><%= review.comment %></p>
+                  <% if (currUser && currUser._id.equals(review.author._id)) { %>
+                    <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                      <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Map Section -->
+  <div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+      <h3>Where you'll be</h3>
+      <div id="map" style="height: 300px; border-radius: 10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Map Script -->
+<script>
+  const latitude = 19.0760; // Replace with dynamic coords if available
+  const longitude = 72.8777;
+
+  const map = L.map('map').setView([latitude, longitude], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  L.marker([latitude, longitude])
+    .addTo(map)
+    .bindPopup('<%= listing.location %>, <%= listing.country %>')
+    .openPopup();
+</script>

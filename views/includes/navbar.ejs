@@ -1,0 +1,86 @@
+<style>
+  /* Search Button */
+  .search-btn {
+    background-color: #fe424d;
+    color: #fff;
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border: none;
+  }
+  .search-btn:hover {
+    background-color: #e63e47;
+    color: #fff;
+  }
+  .search-btn i {
+    display: inline;
+    margin-right: 0.5rem; /* Fixed spacing issue */
+  }
+
+  /* Search Input */
+  .search-inp {
+    border-radius: 25px;
+    padding: 0.5rem 2rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+  }
+
+  /* Fix Navbar Styling */
+  .navbar-nav .nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+  }
+</style>
+
+<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
+  <div class="container-fluid">
+    <!-- Brand Logo -->
+    <a class="navbar-brand" href="/"><i class="fa-regular fa-compass"></i></a>
+
+    <!-- Navbar Toggler for Small Screens -->
+    <button 
+      class="navbar-toggler" 
+      type="button" 
+      data-bs-toggle="collapse" 
+      data-bs-target="#navbarNavAltMarkup">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <!-- Left Side (Explore) -->
+      <div class="navbar-nav">
+        <a class="nav-link" href="/listings">Explore</a>
+      </div>
+
+      <!-- Center (Search Bar) -->
+      <div class="navbar-nav mx-auto">
+        <form class="d-flex" role="search" action="/listings/search" method="GET">
+          <input class="form-control me-2 search-inp" type="search" name="q" placeholder="Search destinations" required>
+          <button class="btn search-btn" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i>Search
+          </button>
+        </form>
+        
+      </div>
+
+      <!-- Right Side (User Options) -->
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/listings/new">Airbnb your home</a>
+
+        <% if(!currUser) { %>
+          <a class="nav-link" href="/signup"><b>Sign up</b></a>
+          <a class="nav-link" href="/login"><b>Log in</b></a>
+        <% } %>
+
+        <% if(currUser) { %>
+  <a class="nav-link" href="/bookings">My Bookings</a>
+   <a class="nav-link" href="/favorites">My Favorites</a>
+  <a class="nav-link" href="/logout">Log out</a>
+<% } %>
+
+      </div>
+    </div>
+  </div>
+</nav>
